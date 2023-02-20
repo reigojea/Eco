@@ -1,0 +1,120 @@
+---
+title: "Econometria. Tema 2"
+author: "REIG OJEA PONCE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+date: '20/feb/2023'
+---
+
+### Com fer chunks de SAS en RMarkown
+
+*Nota:* S'ha de tenir el SAS instal·lat al desktop
+
+```{r, warning=F, message=F}
+# install.packages("SASmarkdown")
+library(SASmarkdown)
+saspath <- "C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe" #UPC
+# saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe" #UB
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+
+
+Chunk d'exemple:
+```{sas}
+proc means data=sashelp.class;
+run;
+```
+
+# Tema 2.  MRLM: Especificació i Estimació
+&nbsp;
+
+$y_t=\beta_1x_{1t}+\beta_2x_{2t}+...+\beta_kx_{kt}+u_t \qquad on\ t=1,2,...,T$
+
+## Hipòtesis bàsiques
+
+### Sobre el model
+
+1. El model és **estocàstic**: No volem un model determinista, sinó que volem un model aleatori. $u_t$ és el terme de pertorbació aleatòria (intercept). La inclusió de $u_t$ ve justificat per:
+
+   - Les variables que hem d'ometre i que expliquen l'endògena, és a dir, factors que no tenim en compte ($y_t$)
+
+   - El propi comportament de $y_t$
+
+   - Els errors de mesura en les variables, incloses o no en el model.
+
+2. El model és lineal o linealitzable (exemple funció Cobb-Douglas).
+
+   - Transformant la funció C-D, es converteix en linealitzable.
+   
+3. Informació estadística suficient. tenir més observacions per variables per tenir suficients graus de llibertat.
+
+### Sobre el terme de pertorbació
+
+Sent el model $Y=X\beta+U$, $U$ és el terme de pertorbació
+
+1. L'esperança matemàtica de $U$ és igual a zero. És important incorporar el terme independent per a què es pugui complir.
+
+2. L'**homocedasticitat**. La variància del terme de pertorbació és constant.
+
+   $$Var(u_i)=\sigma^2_u\quad \forall i$$
+Si hi ha problees d'heterocedasticitat, ens pot donar problemes d'error amb el càlcul de la precisió.
+
+3. No autocorrelació.
+
+$$Cov(u_iu_j)=E(u_iu_j)=0 \qquad \forall i,j=1,2,...,N \enspace i\neq j$$
+
+   - És especialment important amb dades temporals. És més probable que hi hagi un encadenament dels efectes aleatoris durant el temps.
+
+   - Si es tracten de dades transversals.[falta]
+   
+   - Encara que no es compleixi, no afecta al biaix. Valorarem equivocadament la precisió i els errors estàndards
+   
+   - Si es compleix la **homocedasticitat** i la **no autocorrelació**, ens trobem amb un model esfèric.
+   
+4. $U$ es distribueix segons una Normal multivariant
+
+   $$u_i \sim N(0,\sigma^2_u) \qquad U\sim N(0,\sigma^2_uI_N)$$
+
+### Sobre les variables explicatives
+
+1. Variables regressores fixes, no aleatòries.
+
+2. Malgrat siguin regressores aleatòries, cal més que estiguin **incorrelacionades** amb el terme de pertorbació.
+
+   $$E(x_{ji}u_i)=0 \qquad \forall i=1,2,...,N$$
+   Per exemple els salaris són més alts com més escolarització hi hagi. Model:
+   
+   $$\text{Wage}=\beta_0+\beta_{school}+u$$
+   
+   També afecta la habilitat innata. S'hauria de veure si la habilitat innata està relacionada amb els anys d'escolarització o no per validar aquesta hipòtesi.
+   
+3. Les exògenes (X) són linealment independents. El rang coincideix amb el nombre de variables explicatives.
+
+4. Les exògenes estan mesurades sense error.
+
+5. Absència d'errors d'especificació: no s'inclouen variables irrellevants ni s'ometen variables rellevants.
+
+### Sobre els paràmetres
+
+1. Hipòtesi de permanència estructural. És a dir, que siguin constants al llarg de tot el període o, si es tracta d'una població, que sigui el mateix valor per totes le seves subpoblacions.
+
+## Formulació del model
+&nbsp;
+
+$$E(Y)=E(X\beta+U) \underset{X\beta \ és\ constant}{=} X\beta+E(U)=X\beta$$
+
+$$Y \sim N(X\beta ,\sigma^2_uI_N)$$
+
+## Estimació dels paràmetres del model
+
+### Estimació per mínims quadrats
+
+Està fent mínima la distància de cada punt a la recta de regressió.
